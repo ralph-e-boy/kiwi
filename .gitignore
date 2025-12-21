@@ -7,6 +7,7 @@ py/src/version.h
 
 benchmarks/run_bench
 build/
+.build/
 dist/
 kiwisolver.egg-info/
 .eggs
