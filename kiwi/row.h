@@ -7,6 +7,7 @@
 |----------------------------------------------------------------------------*/
 #pragma once
 #include "maptype.h"
+#include "platform.h"
 #include "symbol.h"
 #include "util.h"
 
@@ -26,31 +27,13 @@ public:
 
     Row(double constant) : m_constant(constant) {}
 
-    Row(const Row &other) {
-        m_constant = other.m_constant;
-        m_cells = other.m_cells;
-    }
+    Row(const Row &other) = default;
 
-    Row(Row &&other) noexcept {
-        m_constant = other.m_constant;
-        m_cells = std::move(other.m_cells);
-    }
+    Row(Row &&other) noexcept = default;
 
-    Row& operator=(const Row &other) {
-        if (this != &other) {
-            m_constant = other.m_constant;
-            m_cells = other.m_cells;
-        }
-        return *this;
-    }
+    Row &operator=(const Row &other) = default;
 
-    Row& operator=(Row &&other) noexcept {
-        if (this != &other) {
-            m_constant = other.m_constant;
-            m_cells = std::move(other.m_cells);
-        }
-        return *this;
-    }
+    Row &operator=(Row &&other) noexcept = default;
 
     ~Row() = default;
 
@@ -69,9 +52,17 @@ public:
 	The new value of the constant is returned.
 
 	*/
+    KIWI_ALWAYS_INLINE
     double add(double value)
     {
         return m_constant += value;
+    }
+
+    // Reset for pool reuse — preserves internal capacity.
+    void reset(double constant)
+    {
+        m_cells.clear();
+        m_constant = constant;
     }
 
     /* Insert a symbol into the row with a given coefficient.
@@ -81,6 +72,7 @@ public:
 	is zero, the symbol will be removed from the row.
 
 	*/
+    KIWI_ALWAYS_INLINE
     void insert(const Symbol &symbol, double coefficient = 1.0)
     {
         if (nearZero(m_cells[symbol] += coefficient))
@@ -97,10 +89,9 @@ public:
     void insert(const Row &other, double coefficient = 1.0)
     {
         m_constant += other.m_constant * coefficient;
-
-        for (const auto & cellPair : other.m_cells)
+        for (const auto &cellPair : other.m_cells)
         {
-            double coeff = cellPair.second * coefficient;
+            const double coeff = cellPair.second * coefficient;
             if (nearZero(m_cells[cellPair.first] += coeff))
                 m_cells.erase(cellPair.first);
         }
@@ -139,7 +130,7 @@ public:
 	*/
     void solveFor(const Symbol &symbol)
     {
-        double coeff = -1.0 / m_cells[symbol];
+        const double coeff = -1.0 / m_cells[symbol];
         m_cells.erase(symbol);
         m_constant *= coeff;
         for (auto &cellPair : m_cells)
@@ -168,6 +159,7 @@ public:
 	If the symbol does not exist in the row, zero will be returned.
 
 	*/
+    KIWI_ALWAYS_INLINE
     double coefficientFor(const Symbol &symbol) const
     {
         CellMap::const_iterator it = m_cells.find(symbol);
@@ -190,7 +182,7 @@ public:
         auto it = m_cells.find(symbol);
         if (it != m_cells.end())
         {
-            double coefficient = it->second;
+            const double coefficient = it->second;
             m_cells.erase(it);
             insert(row, coefficient);
         }

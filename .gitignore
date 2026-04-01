@@ -17,3 +17,5 @@ kiwisolver.egg-info/
 
 # clangd cache
 .cache/
+
+Makefile
