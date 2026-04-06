@@ -33,6 +33,7 @@ endif()
 # Options
 option(KIWI_BUILD_BENCHMARKS "Build benchmarks" ${KIWI_IS_TOP_LEVEL})
 option(KIWI_BUILD_TESTS "Build tests" ${KIWI_IS_TOP_LEVEL})
+option(KIWI_SWIFT_WRAPPER "Enable Swift wrapper generation targets" OFF)
 
 # C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -69,6 +70,24 @@ if(KIWI_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+# Swift wrapper generation (opt-in)
+if(KIWI_SWIFT_WRAPPER)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_custom_target(generate-swift-wrapper
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CxxKiwi/generate_wrapper.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating KiwiWrapper.h for Swift package"
+    )
+    add_custom_target(validate-swift-wrapper
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CxxKiwi/generate_wrapper.py
+            --validate-only
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Validating KiwiWrapper.h against kiwi headers"
+    )
+endif()
+
 # Print configuration summary
 message(STATUS "")
 message(STATUS "Kiwi Configuration Summary:")
@@ -76,4 +95,5 @@ message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  C++ Standard: C++${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build benchmarks: ${KIWI_BUILD_BENCHMARKS}")
 message(STATUS "  Build tests: ${KIWI_BUILD_TESTS}")
+message(STATUS "  Swift wrapper: ${KIWI_SWIFT_WRAPPER}")
 message(STATUS "")
