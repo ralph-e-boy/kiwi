@@ -70,9 +70,16 @@ if(KIWI_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# Swift wrapper generation (opt-in)
+# Swift package (opt-in)
 if(KIWI_SWIFT_WRAPPER)
+    find_program(XCRUN xcrun)
+    if(NOT XCRUN)
+        message(FATAL_ERROR "xcrun not found — Swift toolchain required for KIWI_SWIFT_WRAPPER")
+    endif()
+
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+    # Wrapper generation
     add_custom_target(generate-swift-wrapper
         COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CxxKiwi/generate_wrapper.py
@@ -86,6 +93,74 @@ if(KIWI_SWIFT_WRAPPER)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Validating KiwiWrapper.h against kiwi headers"
     )
+
+    # Swift build / test / run
+    add_custom_target(swift-build
+        COMMAND ${XCRUN} swift build
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Building Swift package"
+    )
+    add_custom_target(swift-build-release
+        COMMAND ${XCRUN} swift build -c release
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Building Swift package (release)"
+    )
+    add_custom_target(swift-test
+        COMMAND ${XCRUN} swift test
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running Swift tests"
+    )
+    add_custom_target(swift-run
+        COMMAND ${XCRUN} swift run KiwiTest
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS swift-build
+        COMMENT "Running KiwiTest"
+    )
+    add_custom_target(swift-clean
+        COMMAND ${XCRUN} swift package clean
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Cleaning Swift build artifacts"
+    )
+
+    # Cross-platform builds (via xcodebuild)
+    find_program(XCODEBUILD xcodebuild)
+    if(XCODEBUILD)
+        set(_SWIFT_SCHEME KiwiSolver)
+        set(_SWIFT_XBUILD ${XCODEBUILD} -scheme ${_SWIFT_SCHEME} -quiet)
+
+        add_custom_target(swift-build-ios
+            COMMAND ${_SWIFT_XBUILD} -destination "generic/platform=iOS" build
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building KiwiSolver for iOS"
+        )
+        add_custom_target(swift-build-ios-simulator
+            COMMAND ${_SWIFT_XBUILD} -destination "generic/platform=iOS Simulator" build
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building KiwiSolver for iOS Simulator"
+        )
+        add_custom_target(swift-build-tvos
+            COMMAND ${_SWIFT_XBUILD} -destination "generic/platform=tvOS" build
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building KiwiSolver for tvOS"
+        )
+        add_custom_target(swift-build-watchos
+            COMMAND ${_SWIFT_XBUILD} -destination "generic/platform=watchOS" build
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building KiwiSolver for watchOS"
+        )
+        add_custom_target(swift-build-visionos
+            COMMAND ${_SWIFT_XBUILD} -destination "generic/platform=visionOS" build
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building KiwiSolver for visionOS"
+        )
+        # Aggregate: always-available platforms (macOS + iOS)
+        add_custom_target(swift-build-all-platforms
+            DEPENDS swift-build swift-build-ios swift-build-ios-simulator
+            COMMENT "Building KiwiSolver for macOS + iOS (add tvOS/watchOS/visionOS individually if SDK installed)"
+        )
+    else()
+        message(STATUS "  xcodebuild not found — cross-platform Swift targets disabled")
+    endif()
 endif()
 
 # Print configuration summary
