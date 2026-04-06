@@ -18,3 +18,7 @@ kiwisolver.egg-info/
 
 # clangd cache
 .cache/
+
+CLAUDE.md
+
+.swiftpm
