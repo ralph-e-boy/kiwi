@@ -15,7 +15,8 @@ help:
 
 # Generate Swift public interface from the compiled module.
 swift-api:
-	cd .. && swift build -Xswiftc -emit-module-interface-path \
+	cd .. && xcrun swift build \
+		-Xswiftc -emit-module-interface-path \
 		-Xswiftc docs/$(BUILDDIR)/KiwiSolver.swiftinterface \
 		-Xswiftc -enable-library-evolution \
 		-Xswiftc -no-verify-emitted-module-interface \

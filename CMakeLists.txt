@@ -168,7 +168,16 @@ if(KIWI_SWIFT_WRAPPER)
         )
         set(_SWIFT_API_IFACE ${CMAKE_CURRENT_SOURCE_DIR}/docs/build/KiwiSolver.swiftinterface)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/swift-api.sh
-            "#!/bin/sh\nmkdir -p \"$(dirname '${_SWIFT_API_IFACE}')\"\n${XCRUN} swift build -Xswiftc -emit-module-interface-path -Xswiftc '${_SWIFT_API_IFACE}' -Xswiftc -enable-library-evolution --target KiwiSolver 2>/dev/null || true\necho \"Wrote ${_SWIFT_API_IFACE}\"\n")
+"#!/bin/sh
+mkdir -p \"$(dirname '${_SWIFT_API_IFACE}')\"
+${XCRUN} swift build \\
+    -Xswiftc -emit-module-interface-path \\
+    -Xswiftc '${_SWIFT_API_IFACE}' \\
+    -Xswiftc -enable-library-evolution \\
+    -Xswiftc -no-verify-emitted-module-interface \\
+    --target KiwiSolver
+echo \"Wrote ${_SWIFT_API_IFACE}\"
+")
         add_custom_target(swift-api
             COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/swift-api.sh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
