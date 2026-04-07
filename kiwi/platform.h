@@ -28,7 +28,7 @@
 #endif
 
 // Accelerate framework availability
-#if defined(__APPLE__) && __has_include(<Accelerate/Accelerate.h>)
+#if !defined(KIWI_DISABLE_ACCELERATE) && defined(__APPLE__) && __has_include(<Accelerate/Accelerate.h>)
 #define KIWI_HAS_ACCELERATE 1
 #include <Accelerate/Accelerate.h>
 #else
