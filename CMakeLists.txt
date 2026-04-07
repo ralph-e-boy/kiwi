@@ -154,6 +154,26 @@ if(KIWI_SWIFT_WRAPPER)
             COMMENT "Building KiwiSolver for visionOS"
         )
         # Aggregate: always-available platforms (macOS + iOS)
+        add_custom_target(swift-doc
+            COMMAND ${XCRUN} swift package generate-documentation
+                --target KiwiSolver
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating DocC documentation for KiwiSolver"
+        )
+        add_custom_target(swift-doc-preview
+            COMMAND ${XCRUN} swift package preview-documentation
+                --target KiwiSolver
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Previewing DocC documentation for KiwiSolver"
+        )
+        set(_SWIFT_API_IFACE ${CMAKE_CURRENT_SOURCE_DIR}/docs/build/KiwiSolver.swiftinterface)
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/swift-api.sh
+            "#!/bin/sh\nmkdir -p \"$(dirname '${_SWIFT_API_IFACE}')\"\n${XCRUN} swift build -Xswiftc -emit-module-interface-path -Xswiftc '${_SWIFT_API_IFACE}' -Xswiftc -enable-library-evolution --target KiwiSolver 2>/dev/null || true\necho \"Wrote ${_SWIFT_API_IFACE}\"\n")
+        add_custom_target(swift-api
+            COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/swift-api.sh
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating Swift public interface (.swiftinterface)"
+        )
         add_custom_target(swift-build-all-platforms
             DEPENDS swift-build swift-build-ios swift-build-ios-simulator
             COMMENT "Building KiwiSolver for macOS + iOS (add tvOS/watchOS/visionOS individually if SDK installed)"
