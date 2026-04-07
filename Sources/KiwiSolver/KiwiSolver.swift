@@ -80,8 +80,8 @@ public final class Variable {
 // MARK: - Term (coefficient * variable)
 
 public struct Term {
-    let variable: Variable
-    let coefficient: Double
+    public let variable: Variable
+    public let coefficient: Double
 
     public init(_ variable: Variable, coefficient: Double = 1.0) {
         self.variable = variable
@@ -92,8 +92,8 @@ public struct Term {
 // MARK: - Expression (sum of terms + constant)
 
 public struct Expression {
-    var terms: [Term]
-    var constant: Double
+    public var terms: [Term]
+    public var constant: Double
 
     public init(_ terms: [Term] = [], constant: Double = 0) {
         self.terms = terms
