@@ -51,6 +51,11 @@ target_include_directories(kiwi
 
 target_compile_features(kiwi INTERFACE cxx_std_11)
 
+# Link Accelerate framework on Apple platforms (used by vDSP in solver)
+if(APPLE)
+    target_link_libraries(kiwi INTERFACE "-framework Accelerate")
+endif()
+
 target_compile_options(kiwi INTERFACE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
         -Wall 
