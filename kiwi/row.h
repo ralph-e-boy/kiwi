@@ -217,15 +217,7 @@ public:
     void reverseSign()
     {
         m_constant = -m_constant;
-        const std::size_t n = m_values.size();
-#if KIWI_HAS_ACCELERATE
-        if (n > 0)
-        {
-            vDSP_vnegD(m_values.data(), 1, m_values.data(), 1, static_cast<vDSP_Length>(n));
-            return;
-        }
-#endif
-        for (std::size_t i = 0; i < n; ++i)
+        for (std::size_t i = 0, n = m_values.size(); i < n; ++i)
             m_values[i] = -m_values[i];
     }
 
@@ -246,15 +238,7 @@ public:
         const double coeff = -1.0 / m_values[pos];
         eraseAt(pos);
         m_constant *= coeff;
-        const std::size_t n = m_values.size();
-#if KIWI_HAS_ACCELERATE
-        if (n > 0)
-        {
-            vDSP_vsmulD(m_values.data(), 1, &coeff, m_values.data(), 1, static_cast<vDSP_Length>(n));
-            return;
-        }
-#endif
-        for (std::size_t i = 0; i < n; ++i)
+        for (std::size_t i = 0, n = m_values.size(); i < n; ++i)
             m_values[i] *= coeff;
     }
 

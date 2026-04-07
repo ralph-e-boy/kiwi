@@ -6,8 +6,6 @@
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 #pragma once
-#include <cmath>
-#include <cstdint>
 
 // Force-inline for hot-path functions
 #if defined(__GNUC__) || defined(__clang__)
@@ -27,10 +25,3 @@
 #define KIWI_UNLIKELY(x) (x)
 #endif
 
-// Accelerate framework availability
-#if !defined(KIWI_DISABLE_ACCELERATE) && defined(__APPLE__) && __has_include(<Accelerate/Accelerate.h>)
-#define KIWI_HAS_ACCELERATE 1
-#include <Accelerate/Accelerate.h>
-#else
-#define KIWI_HAS_ACCELERATE 0
-#endif
