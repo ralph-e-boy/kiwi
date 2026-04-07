@@ -33,6 +33,7 @@ endif()
 # Options
 option(KIWI_BUILD_BENCHMARKS "Build benchmarks" ${KIWI_IS_TOP_LEVEL})
 option(KIWI_BUILD_TESTS "Build tests" ${KIWI_IS_TOP_LEVEL})
+option(KIWI_USE_ACCELERATE "Use Apple Accelerate framework for vDSP optimizations" ON)
 
 # C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -52,8 +53,10 @@ target_include_directories(kiwi
 target_compile_features(kiwi INTERFACE cxx_std_11)
 
 # Link Accelerate framework on Apple platforms (used by vDSP in solver)
-if(APPLE)
+if(APPLE AND KIWI_USE_ACCELERATE)
     target_link_libraries(kiwi INTERFACE "-framework Accelerate")
+else()
+    target_compile_definitions(kiwi INTERFACE KIWI_DISABLE_ACCELERATE)
 endif()
 
 target_compile_options(kiwi INTERFACE
@@ -81,4 +84,5 @@ message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  C++ Standard: C++${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build benchmarks: ${KIWI_BUILD_BENCHMARKS}")
 message(STATUS "  Build tests: ${KIWI_BUILD_TESTS}")
+message(STATUS "  Use Accelerate: ${KIWI_USE_ACCELERATE}")
 message(STATUS "")
